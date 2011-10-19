@@ -86,10 +86,10 @@ getLineCommentAutomat (State sEnd) = State s0
     where 
         s0 (c,n) | c == '#' = (save c, State s1)
                  | otherwise = sEnd (c,n)
-        s1 (c,n) | c == '\n' = (end, State s0)
+        s1 (c,n) | c == '\n' = sEnd (c,n)
                  | isEOF c = sFail 1 n
                  | otherwise = (save c, State s1)
------------------------------------------------------------------------------need testing-
+------------------------------------------------------------------------------
 getStringAutomat :: Automat
 getStringAutomat (State sEnd) = State s0
     where

@@ -1,5 +1,4 @@
-" \\" /* this string is awesome" */
-# "this string is in comment y \4o, and its wrong 
- "huy s ochkami"
+" \\"/* this string is awesome" */# "this string is in comment y \4o, and its wrong 
+"hu is with  ochkami"
 
 
