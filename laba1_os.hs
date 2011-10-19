@@ -64,7 +64,7 @@ getSomethingAutomat (State sEnd) = spaces_comment_or_eof
     where
         s0 (c,n) | isSpace c = (end, spaces_comment_or_eof)
                  | otherwise = sEnd (c,n)
-        spaces_comment_or_eof = getSpacesAutomat $ getEOFAutomat $ getCCommentAutomat $ State s0
+        spaces_comment_or_eof = getSpacesAutomat $ getEOFAutomat $ getLineCommentAutomat $  getCCommentAutomat $ State s0
 -------------------------------------------------------------------------------
 
 getCCommentAutomat :: Automat
@@ -73,16 +73,36 @@ getCCommentAutomat (State sEnd) = State s0
 	s0 (c,n) | c == '/' = (save c, State s1)
                  | otherwise = sEnd (c,n)
         s1 (c,n) | c == '*' = (save c, State s2)
-                 | otherwise = sFail 0 n
+                 | otherwise = sFail 1 n
         s2 (c,n) | c == '*' = (save c, State s3)
-                 | otherwise = (save c, State s2) -- miss eof here
+                 | isEOF c = sFail 2 n
+                 | otherwise = (save c, State s2) 
         s3 (c,n) | c == '*' = (save c, State s3)
                  | c == '/' = (save c, State s0)
                  | otherwise = (save c, State s2)
 
 getLineCommentAutomat :: Automat
-getLineCommentAutomat (State sEnd) = undefined
-
+getLineCommentAutomat (State sEnd) = State s0 
+    where 
+        s0 (c,n) | c == '#' = (save c, State s1)
+                 | otherwise = sEnd (c,n)
+        s1 (c,n) | c == '\n' = (end, State s0)
+                 | isEOF c = sFail 1 n
+                 | otherwise = (save c, State s1)
+------------------------------------------------------------------------------
+getStringAutomat :: Automat
+getStringAutomat (State sEnd) = State s0
+    where
+        s0 (c,n) | c == '"'  = (save c, State s1)
+                 | otherwise = sEnd (c,n)
+        s1 (c,n) | c == '\\' = (save c, State s2)
+                 | c == '"'  = (saveEnd c, sEnd)
+                 | otherwise = (save c, State s1)
+        s2 (c,n) | c == 't'
+                 || c == 'n'
+                 || c == '\\'
+                 || c == '"' = (save c, State s1)
+                 | otherwise = sFail 2 n
 -------------------------------------------------------------------------------        
 getMailsAutomat :: Automat
 getMailsAutomat (State sEnd) = spaces_mail_or_eof
