@@ -64,7 +64,7 @@ getSomethingAutomat (State sEnd) = spaces_comment_or_eof
     where
         s0 (c,n) | isSpace c = (end, spaces_comment_or_eof)
                  | otherwise = sEnd (c,n)
-        spaces_comment_or_eof = getSpacesAutomat $ getEOFAutomat $ getLineCommentAutomat $  getCCommentAutomat $ State s0
+        spaces_comment_or_eof = getSpacesAutomat $ getEOFAutomat $ getStringAutomat $ getCCommentAutomat $ getLineCommentAutomat $ State s0
 -------------------------------------------------------------------------------
 
 getCCommentAutomat :: Automat
@@ -89,14 +89,14 @@ getLineCommentAutomat (State sEnd) = State s0
         s1 (c,n) | c == '\n' = (end, State s0)
                  | isEOF c = sFail 1 n
                  | otherwise = (save c, State s1)
-------------------------------------------------------------------------------
+-----------------------------------------------------------------------------need testing-
 getStringAutomat :: Automat
 getStringAutomat (State sEnd) = State s0
     where
         s0 (c,n) | c == '"'  = (save c, State s1)
                  | otherwise = sEnd (c,n)
         s1 (c,n) | c == '\\' = (save c, State s2)
-                 | c == '"'  = (saveEnd c, sEnd)
+                 | c == '"'  = (save c, State sEnd)
                  | otherwise = (save c, State s1)
         s2 (c,n) | c == 't'
                  || c == 'n'

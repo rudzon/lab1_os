@@ -1,1 +1,5 @@
-burum_burum@l-a-bla-.awd  		
+" \\" /* this string is awesome" */
+# "this string is in comment y \4o, and its wrong 
+ "huy s ochkami"
+
+
